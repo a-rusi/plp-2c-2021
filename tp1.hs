@@ -34,22 +34,21 @@ mapRTE f = foldRose (\x rec -> Rose (f x) rec)
 nodos :: RTE a -> [a]
 nodos = foldRose (\x rec -> (x : (concat $ snd $ unzip rec)))
 
--- (1 : [(clave, [2:4]), []])
-
-
 etiquetas :: RTE a -> [Char]
-etiquetas = undefined
-
+etiquetas = foldRose (\x rec -> ((fst $ unzip rec) ++ (concat $ snd $ unzip rec)))
 
 altura :: RTE a -> Int
 altura = foldRose (\x rec -> if rec == [] then 0 else 1 + (maximum $ snd $ unzip rec))
 
 ramas :: RTE a -> [String]
-ramas = undefined
+ramas = foldRose (\x rec -> map ((:) $ fst $ unzip rec) (snd $ unzip rec))
 
 
-subRose :: RTE a -> Int -> RTE a
-subRose = undefined
+--subRose :: RTE a -> Int -> RTE a
+--subRose = foldRose (\x rec -> Rose x rec)
+  --if altura (Rose valor trees) - altura (Rose x rec) = poda
+    --then (Rose x [])
+    --else (Rose x rec))
 
 
 tests :: IO Counts

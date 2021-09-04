@@ -41,8 +41,9 @@ altura :: RTE a -> Int
 altura = foldRose (\x rec -> if rec == [] then 0 else 1 + (maximum $ snd $ unzip rec))
 
 ramas :: RTE a -> [String]
-ramas = foldRose (\x rec -> map ((:) $ fst $ unzip rec) (snd $ unzip rec))
-
+ramas = foldRose (\x rec -> if (snd $ unzip rec) == [] 
+    then [fst $ unzip rec]
+    else concat $ map (\ y -> map ((fst y) :) (snd y)) rec)
 
 --subRose :: RTE a -> Int -> RTE a
 --subRose = foldRose (\x rec -> Rose x rec)

@@ -46,7 +46,7 @@ subRose unRose poda = (foldRose (\x rec -> if poda <= 0
     else (aux x rec)) unRose) poda
 
 aux :: Num t => a -> [(Char, t -> RTE a)] -> t -> RTE a
-aux x rec = (\x rec poda -> Rose x (map (\(i,j) -> (i, (j (poda-1)))) rec) ) x rec
+aux = (\x rec poda -> Rose x (map (\(i,j) -> (i, (j (poda-1)))) rec) )
 
 tests :: IO Counts
 tests = do runTestTT allTests

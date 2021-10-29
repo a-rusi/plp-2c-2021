@@ -36,17 +36,11 @@ altura = foldRose (\x rec -> if rec == [] then 1 else 1 + (maximum $ snd $ unzip
 ramas :: RTE a -> [String]
 ramas = foldRose (\x rec -> if rec == [] then [[]] else concatMap (\ y -> map ((fst y) :) (snd y)) rec)
 
---implementacion de subrose utilizando recursion estructural
-subRose2 (Rose raiz hijos) 0 = Rose raiz []
-subRose2 (Rose raiz hijos) poda = Rose raiz (map (\(x, y) -> (x, subRose y (poda-1))) hijos)
-
---implementacion incompleta de subrose (no funciona)
-subRose unRose poda = (foldRose (\x rec -> if poda <= 0 
-    then (const $ Rose x [])
-    else (aux x rec)) unRose) poda
-
-aux :: Num t => a -> [(Char, t -> RTE a)] -> t -> RTE a
-aux = (\x rec poda -> Rose x (map (\(i,j) -> (i, (j (poda-1)))) rec) )
+subRose :: RTE a -> Int -> RTE a
+subRose unRose poda = (foldRose generarArbol unRose) poda
+  where
+    generarArbol raiz acumulador 1 = Rose raiz []
+    generarArbol raiz acumulador altura = Rose raiz (map (\(clave, recur) -> (clave, recur (altura-1))) acumulador)
 
 tests :: IO Counts
 tests = do runTestTT allTests
@@ -127,6 +121,8 @@ testsEj5 = test [
   ]
 
 testsEj6 = test [
-  subRose2 (Rose 1 []) 1 ~=? Rose 1 [],
-  subRose2 unRose 1 ~=? (Rose 1 [('a',Rose 2 []),('b',Rose 3 [])])
+  subRose (Rose 1 []) 1 ~=? Rose 1 [],
+  subRose unRose 1 ~=? (Rose 1 []),
+  subRose unRose 2 ~=? Rose 1 [('a',Rose 2 []),('b',Rose 3 [])],
+  subRose unRose 3 ~=? unRose
   ]

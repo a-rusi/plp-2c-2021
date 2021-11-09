@@ -105,17 +105,24 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
+function todosLosAtaques(pokemon) {
+  var result = [];
+  var mensajes = [];
+  var objeto = pokemon;
+  while (objeto != null) {
+    mensajes.push(...Object.getOwnPropertyNames(objeto));
+    objeto = Object.getPrototypeOf(objeto);
+  }
+  return mensajes.filter(message => message.includes('ataque'));
+}
+
 function ejercicio6() {
   Pokemon.prototype.algunAtaque = function () {
-    let keys = Object.keys(this);
-
-    while (true) {
-      numeroRandom = getRandomInt(keys.length);
-      if (keys[numeroRandom] != "hp" && keys[numeroRandom] != "tipo" && keys[numeroRandom] != "atacar") {
-        return keys[numeroRandom];
-      }
-    }
+    let ataques = todosLosAtaques(this);
+    numeroRandom = getRandomInt(ataques.length);
+    return ataques[numeroRandom];
   }
+
   peleaPokemon = function (pokemon1, pokemon2) {
     atacante = pokemon1;
     defensor = pokemon2;
@@ -325,6 +332,14 @@ function testEjercicio6(res) {
   res.write(`Pelean Scyther y Venonat, el ganador ${si_o_no(elGanadorEsScyther2)} es Scyther.`, elGanadorEsScyther2);
   res.write("Venonat pudo lastimar a Scyther", scyther.hp == 399);
 
+  // todosLosAtaques consigue ataques del prototipo
+  let algunAtaqueTieneMensajeDelPrototipo = todosLosAtaques(pikachu).includes('ataquePararrayo')
+  res.write(`La funcion auxiliar devuelve los ataques del prototipo ${si_o_no(algunAtaqueTieneMensajeDelPrototipo)}`, algunAtaqueTieneMensajeDelPrototipo);
+
+  // algunAtaque consigue ataques del prototipo
+  let eevee = new Pokemon(30, { 'ataqueArena': function (enemigo) { } });
+  let jolteon = eevee.evolucionar();
+  res.write(`Algun ataque de Jolteon solo son los de su prototipo porque no conoce otros`, jolteon.algunAtaque() == 'ataqueArena');
 
 }
 

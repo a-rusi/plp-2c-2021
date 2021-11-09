@@ -20,21 +20,16 @@ let ditto;
 
 // Ejercicio 1
 function ejercicio1() {
+  lastimarDiezHP = function (enemigo) { enemigo.hp = enemigo.hp - 10; }
   bulbasaur = {
     hp: 300,
-    ataquePlacaje: function (enemigo) {
-      enemigo.hp = enemigo.hp - 10;
-    },
-    ataqueLatigoCepa: function (enemigo) {
-      enemigo.hp = enemigo.hp - 10;
-    },
+    ataquePlacaje: lastimarDiezHP,
+    ataqueLatigoCepa: lastimarDiezHP,
     tipo: tipoPlanta
   };
   pikachu = {
     hp: 250,
-    ataqueImpactrueno: function (enemigo) {
-      enemigo.hp = enemigo.hp - 10;
-    }
+    ataqueImpactrueno: lastimarDiezHP
   };
 }
 

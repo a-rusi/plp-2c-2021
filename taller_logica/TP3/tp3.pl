@@ -30,23 +30,32 @@ sonCampeones([L|LS]) :- campeon(L), sonCampeones(LS).
 % equipoInfinito(-E)
 equipoInfinito(E) :- desde(1,Tamaño), length(E,Tamaño), sonCampeones(E).
 
+distintosTipos(_, []).
+distintosTipos((L,HP,DAÑO), [(L1,_,_)|LS]) :- tipo(L, TIPO), tipo(L1, TIPO1), TIPO \= TIPO1, distintosTipos((L,HP,DAÑO), LS).
 
-% equipoValido(-E).
-%equipoValido(E) :- 
-%todosCampeones(E),
-% between(1,4,CantJugadores),
-% length(E,CantJugadores),
-% sinTiposRepetidos(E).
+sinTiposRepetidos([]).
+sinTiposRepetidos([L|LS]) :- distintosTipos(L, LS), sinTiposRepetidos(LS).
 
+% equipoValido(-E)
+equipoValido(E) :- 
+between(1,4,CantJugadores),
+length(E,CantJugadores),
+sonCampeones(E),
+sinTiposRepetidos(E).
 
+bajarAD([], [], _).
+bajarAD([(NOMBRE, HP, AD)|E2],[(NOMBRE1, HP1, AD1)|E2F], ATAQUE) 
+:- NOMBRE1 = NOMBRE, HP1 is HP,AD1 is AD - ATAQUE, bajarAD(E2, E2F, ATAQUE).
 
-
+atacar(mago, (_, _, AD), E1, E2, E1F, E2F) :- bajarAD(E2, E2F, AD), E1F = E1.
+%atacar(asesino, E1, E2, E1F, E2F) :-
+%atacar(tanque, E1, E2, E1F, E2F) :-
+%atacar(soporte, E1, E2, E1F, E2F) :-
 
 % stepPelea(+E1, +E2, -E1F, -E2F)
-
-
-
-
+%stepPelea([(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- tipo(NOMBRE, TIPO),
+%  atacar(TIPO, (NOMBRE, HP, AD), E1, E2, E1F, E2F),
+%  moverAtras((NOMBRE, HP, AD), E1, E1F).
 
 % pelea(+E1, +E2, +C, -G)
 

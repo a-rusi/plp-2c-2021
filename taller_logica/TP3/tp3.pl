@@ -45,15 +45,20 @@ sinTiposRepetidos(E).
 
 bajarAD([], [], _).
 bajarAD([(NOMBRE, HP, AD)|E2],[(NOMBRE1, HP1, AD1)|E2F], ATAQUE) 
-:- NOMBRE1 = NOMBRE, HP1 is HP,AD1 is AD - ATAQUE, bajarAD(E2, E2F, ATAQUE).
+:- NOMBRE1 = NOMBRE, HP1 is HP, AD1 is max(AD - ATAQUE,0), bajarAD(E2, E2F, ATAQUE).
 
 bajarHPAlPrimero([], [], _).
 bajarHPAlPrimero([(NOMBRE, HP, AD)|E2],[(NOMBRE1, HP1, AD1)|E2F], ATAQUE) 
-:- NOMBRE1 = NOMBRE, AD1 is AD, HP1 is HP - ATAQUE, E2F = E2.
+:- HP - ATAQUE > 0, NOMBRE1 = NOMBRE, AD1 is AD, HP1 is HP - ATAQUE, E2F = E2.
+bajarHPAlPrimero([(NOMBRE, HP, AD)|E2],E2F, ATAQUE) 
+:- HP - ATAQUE =< 0, E2F = E2.
 
 bajarHP([], [], _).
-bajarHP([(NOMBRE, HP, AD)|E2],[(NOMBRE1, HP1, AD1)|E2F], ATAQUE) 
-:- NOMBRE1 = NOMBRE, AD1 is AD, HP1 is HP - ATAQUE, bajarHP(E2, E2F, ATAQUE).
+bajarHP([(NOMBRE, HP, AD)|E2],[(NOMBRE1,HP1,AD1)|E2F], ATAQUE) 
+:- HP - ATAQUE > 0, NOMBRE1 = NOMBRE, AD1 is AD, HP1 is HP - ATAQUE, bajarHP(E2, E2F, ATAQUE).
+bajarHP([(NOMBRE, HP, AD)|E2],E2F, ATAQUE) 
+:- HP - ATAQUE =< 0, bajarHP(E2, E2F, ATAQUE).
+
 
 buffearEquipo([], [], _).
 buffearEquipo([(NOMBRE, HP, AD)|E1],[(NOMBRE1, HP1, AD1)|E1F], ATAQUE) 
@@ -61,36 +66,52 @@ buffearEquipo([(NOMBRE, HP, AD)|E1],[(NOMBRE1, HP1, AD1)|E1F], ATAQUE)
 
 % atacar(soporte, (akali,200,150), [(akali,200,150), (teemo,180,80), (evelyn,200,130)], [(soraka,300,10), (teemo,180,80)], E1F, E2F).
 
-atacar(mago, (_, _, AD), E1, E2, E1F, E2F) :- bajarAD(E2, E2F, AD), E1F = E1.
-atacar(asesino, (_,_,AD), E1, E2, E1F, E2F) :- bajarHPAlPrimero(E2,E2F, AD), E1F = E1.
-atacar(tanque, (_,_,AD), E1, E2, E1F, E2F) :- bajarHP(E2,E2F, AD), E1F = E1.
-atacar(soporte, (_,_,_), [(NOMBRE,HP,AD)|E1], E2, [(NOMBRE1,HP1,AD1)|E1F], E2F) :- NOMBRE1 = NOMBRE,
- AD1 is AD,
-  HP1 is HP,
-   buffearEquipo(E1,E1F,AD),
-    E2F = E2.
+moverAtras(CAMPEON, E1, E1F) :- append(E1, [CAMPEON], E1F).
 
-% moverAtras(CAMPEON, E1, E1F) :- E1F = [E1|CAMPEON].
+atacar(mago, (_, _, AD), [(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- bajarAD(E2, E2F, AD), moverAtras((NOMBRE, HP, AD), E1, E1F).
+atacar(asesino, (_,_,AD), [(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- bajarHPAlPrimero(E2,E2F, AD), moverAtras((NOMBRE, HP, AD), E1, E1F).
+atacar(tanque, (_,_,AD), [(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- bajarHP(E2,E2F, AD), moverAtras((NOMBRE, HP, AD), E1, E1F).
+atacar(soporte, (_,_,_), [(NOMBRE,HP,AD)|E1], E2, E1F, E2F) :- 
+  NOMBRE1 = NOMBRE, HP1 is HP, AD1 is AD,
+   buffearEquipo(E1,X,AD),
+   append(X, [(NOMBRE1,HP1,AD1)], E1F),
+   E2F = E2.
 
 % stepPelea(+E1, +E2, -E1F, -E2F)
 stepPelea([(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- tipo(NOMBRE, TIPO),
-  atacar(TIPO, (NOMBRE, HP, AD), [(NOMBRE, HP, AD)|E1], E2, E1F, E2F),
-  moverAtras((NOMBRE, HP, AD), E1, E1F).
+  atacar(TIPO, (NOMBRE, HP, AD), [(NOMBRE, HP, AD)|E1], E2, E1F, E2F).
+
+% par(+Y)
+par(Y) :- Y mod 2 =:= 0.
 
 % pelea(+E1, +E2, +C, -G)
+pelea(E1, E2, C, G) :- peleaAux(E1,E2,E1F,E2F,C,G).
 
+peleaAux(E1, E2, E1F, E2F, 0, G) :- length(E1, X), length(E2, Y), X > Y, E1 = G.
+peleaAux(E1, E2, E1F, E2F, 0, G) :- length(E1, X), length(E2, Y), X < Y, E2 = G.
+peleaAux(E1, E2, E1F, E2F, 0, G) :- length(E1, X), length(E2, Y), X =:= Y, G = [].
+peleaAux([], E2, E1F, E2F, _, G) :- G = E2.
+peleaAux(E1, [], E1F, E2F, _, G) :- G = E1.
+peleaAux(E1, E2, E1F, E2F, C, G) :- par(C),C > 0, stepPelea(E1, E2, E1F, E2F), STEP is C-1, peleaAux(E1F, E2F, E1FF, E2FF, STEP, G).
+peleaAux(E1, E2, E1F, E2F, C, G) :- not(par(C)), stepPelea(E2, E1, E2F, E1F), STEP is C-1, peleaAux(E1F, E2F, E1FF, E2FF, STEP, G).
 
-
-
-
+nombreCampeones([],[]).
+nombreCampeones([(NOMBRE,_,_)|E], [NOMBRE1|EF]) :- NOMBRE1 = NOMBRE, nombreCampeones(E,EF).
 
 % gana(?E1, +E2)
-
+gana(E1, E2) :- equipoValido(E1),
+ pelea(E1, E2, 10, G),
+  nombreCampeones(G, GANADORES),
+   nombreCampeones(E1, CAMPEONES),
+   length(GANADORES, X),
+   X > 0,
+    subset(GANADORES, CAMPEONES).
 
 
 
 
 % honor(+E1, +E2, -C)
+honor(E1,E2,C) :- pelea(E1, E2, 10, G), member((NOMBRE,HP1,_), G), campeon((NOMBRE,HP,_)), C = NOMBRE.
 
 
 
@@ -175,6 +196,6 @@ tests(todos) :-
   tests(stepPelea),
   tests(pelea),
   tests(gana),
-  tests(honor).
+  tests(gana).
 
 tests :- tests(todos).

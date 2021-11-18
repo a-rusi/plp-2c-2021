@@ -12,7 +12,9 @@ instance Show a => Show (RTE a) where
 
 --------------Resolver--------------
 instance Eq a => Eq (RTE a) where
-  (Rose i hijos1) == (Rose j hijos2) = i == j && length (List.permutations hijos1 `List.intersect` List.permutations hijos2) == length (List.permutations hijos1)
+  (Rose i hijos1) == (Rose j hijos2) = i == j &&
+   length hijos1 == length hijos2 &&
+    length (List.permutations hijos1 `List.intersect` List.permutations hijos2) == length (List.permutations hijos1)
 
 
 foldRose:: (a -> [(Char, b)] -> b) -> RTE a -> b
@@ -57,6 +59,8 @@ otroRose = Rose 2 [('z',Rose 42 [('y',Rose 41 [])]),('x',Rose 40 [])]
 arbol1 = Rose 1 [('a', Rose 1 [])]
 arbol2 = Rose 1 [('a', Rose 1 []), ('z', Rose 32 [])]
 
+arbol1ConAlturaExtra = Rose 1 [('a', Rose 1 [('b', Rose 42 [])])]
+
 unRoseConRepetidos = Rose 1 [('a', Rose 2 []), ('a', Rose 2 []), ('b', Rose 2 [])]
 unRoseSinRepetidos = Rose 1 [('a', Rose 2 []), ('b', Rose 2 []), ('b', Rose 2 [])]
 
@@ -77,6 +81,8 @@ mismoArbolDistintasRaices1 = Rose 42 [('a', Rose 2 []), ('a', Rose 2 []), ('b', 
 mismoArbolDistintasRaices2 = Rose 2021 [('a', Rose 2 []), ('a', Rose 2 []), ('b', Rose 2 [])]
 
 
+
+
 testsEj1 = test [
   (Rose 1 [] == Rose 1 []) ~=? True,
   (Rose 1 [] == Rose 2 []) ~=? False,
@@ -88,7 +94,9 @@ testsEj1 = test [
   (arbolOrden1 == arbolOrden2) ~=? True, --igualdad toma los contenidos del arbol, sin importar su orden
   (arbolOrden1ConHijos == arbolOrden2ConHijos) ~=? True,
   (arbolMismoValoresDistintasClaves1 == arbolMismoValoresDistintasClaves2) ~=? False, --a la igualdad le importan los valores de las claves
-  (mismoArbolDistintasRaices1 == mismoArbolDistintasRaices2) ~=? False
+  (mismoArbolDistintasRaices1 == mismoArbolDistintasRaices2) ~=? False,
+  (arbol1 == arbol1ConAlturaExtra) ~=? False,
+  (arbol1ConAlturaExtra == arbol1) ~=? False
   ]
 
 testsEj2 = test [

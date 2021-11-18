@@ -47,15 +47,35 @@ bajarAD([], [], _).
 bajarAD([(NOMBRE, HP, AD)|E2],[(NOMBRE1, HP1, AD1)|E2F], ATAQUE) 
 :- NOMBRE1 = NOMBRE, HP1 is HP,AD1 is AD - ATAQUE, bajarAD(E2, E2F, ATAQUE).
 
+bajarHPAlPrimero([], [], _).
+bajarHPAlPrimero([(NOMBRE, HP, AD)|E2],[(NOMBRE1, HP1, AD1)|E2F], ATAQUE) 
+:- NOMBRE1 = NOMBRE, AD1 is AD, HP1 is HP - ATAQUE, E2F = E2.
+
+bajarHP([], [], _).
+bajarHP([(NOMBRE, HP, AD)|E2],[(NOMBRE1, HP1, AD1)|E2F], ATAQUE) 
+:- NOMBRE1 = NOMBRE, AD1 is AD, HP1 is HP - ATAQUE, bajarHP(E2, E2F, ATAQUE).
+
+buffearEquipo([], [], _).
+buffearEquipo([(NOMBRE, HP, AD)|E1],[(NOMBRE1, HP1, AD1)|E1F], ATAQUE) 
+:- NOMBRE1 = NOMBRE, AD1 is AD + ATAQUE, HP1 is HP + ATAQUE, buffearEquipo(E1, E1F, ATAQUE).
+
+% atacar(soporte, (akali,200,150), [(akali,200,150), (teemo,180,80), (evelyn,200,130)], [(soraka,300,10), (teemo,180,80)], E1F, E2F).
+
 atacar(mago, (_, _, AD), E1, E2, E1F, E2F) :- bajarAD(E2, E2F, AD), E1F = E1.
-%atacar(asesino, E1, E2, E1F, E2F) :-
-%atacar(tanque, E1, E2, E1F, E2F) :-
-%atacar(soporte, E1, E2, E1F, E2F) :-
+atacar(asesino, (_,_,AD), E1, E2, E1F, E2F) :- bajarHPAlPrimero(E2,E2F, AD), E1F = E1.
+atacar(tanque, (_,_,AD), E1, E2, E1F, E2F) :- bajarHP(E2,E2F, AD), E1F = E1.
+atacar(soporte, (_,_,_), [(NOMBRE,HP,AD)|E1], E2, [(NOMBRE1,HP1,AD1)|E1F], E2F) :- NOMBRE1 = NOMBRE,
+ AD1 is AD,
+  HP1 is HP,
+   buffearEquipo(E1,E1F,AD),
+    E2F = E2.
+
+% moverAtras(CAMPEON, E1, E1F) :- E1F = [E1|CAMPEON].
 
 % stepPelea(+E1, +E2, -E1F, -E2F)
-%stepPelea([(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- tipo(NOMBRE, TIPO),
-%  atacar(TIPO, (NOMBRE, HP, AD), E1, E2, E1F, E2F),
-%  moverAtras((NOMBRE, HP, AD), E1, E1F).
+stepPelea([(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- tipo(NOMBRE, TIPO),
+  atacar(TIPO, (NOMBRE, HP, AD), [(NOMBRE, HP, AD)|E1], E2, E1F, E2F),
+  moverAtras((NOMBRE, HP, AD), E1, E1F).
 
 % pelea(+E1, +E2, +C, -G)
 

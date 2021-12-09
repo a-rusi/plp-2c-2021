@@ -97,25 +97,27 @@ stepPelea([(NOMBRE, HP, AD)|E1], E2, E1F, E2F) :- tipo(NOMBRE, TIPO),
 par(Y) :- Y mod 2 =:= 0.
 
 % pelea(+E1, +E2, +C, -G)
-pelea(E1, E2, C, G) :- peleaAux(E1, E2, _, _, C, G).
+pelea(E1, E2, C, G) :- pelea(E1, E2, _, _, C, G).
 
-% peleaAux(+E1, +E2, -E1F, -E2F, +C, -G)
-peleaAux(E1, E2, _, _, 0, E1) :- length(E1, X), length(E2, Y), X > Y.
-peleaAux(E1, E2, _, _, 0, E2) :- length(E1, X), length(E2, Y), X < Y.
-peleaAux(E1, E2, _, _, 0, []) :- length(E1, X), length(E2, Y), X =:= Y.
-peleaAux([], E2, _, _, _, E2).
-peleaAux(E1, [], _, _, _, E1).
-peleaAux(E1, E2, E1F, E2F, C, G) :- C > 0, stepPelea(E1, E2, E1F, E2F), STEP is C-1, peleaAux(E2F, E1F, _, _, STEP, G).
-% peleaAux(E1, E2, E1F, E2F, C, G) :- par(C), C > 0, stepPelea(E1, E2, E1F, E2F), STEP is C-1, peleaAux(E1F, E2F, _, _, STEP, G).
-% peleaAux(E1, E2, E1F, E2F, C, G) :- not(par(C)), stepPelea(E2, E1, E2F, E1F), STEP is C-1, peleaAux(E1F, E2F, _, _, STEP, G).
+% pelea(+E1, +E2, -E1F, -E2F, +C, -G)
+pelea(E1, E2, _, _, 0, E1) :- length(E1, X), length(E2, Y), X > Y.
+pelea(E1, E2, _, _, 0, E2) :- length(E1, X), length(E2, Y), X < Y.
+pelea(E1, E2, _, _, 0, []) :- length(E1, X), length(E2, Y), X =:= Y.
+pelea([], E2, _, _, _, E2).
+pelea(E1, [], _, _, _, E1).
+pelea(E1, E2, E1F, E2F, C, G) :- C > 0, stepPelea(E1, E2, E1F, E2F), STEP is C-1, pelea(E2F, E1F, _, _, STEP, G).
+
 
 % nombreCampeones(+E, -EF)
 nombreCampeones([],[]).
 nombreCampeones([(NOMBRE,_,_)|E], [NOMBRE1|EF]) :- NOMBRE1 = NOMBRE, nombreCampeones(E,EF).
 
 % gana(?E1, +E2)
-gana(E1, E2) :- equipoValido(E1),
- pelea(E1, E2, 10, G),
+gana(E1, E2) :- equipoValido(E1), nonvar(E1), ganaPelea(E1, E2).
+gana(E1, E2) :- equipoValido(E1), var(E1), length(E1, LARGO1), length(E2, LARGO2), LARGO1 =:= LARGO2, ganaPelea(E1, E2).
+
+% ganaPelea(?E1, E2)
+ganaPelea(E1, E2) :- pelea(E1, E2, 10, G),
   nombreCampeones(G, GANADORES),
    nombreCampeones(E1, CAMPEONES),
    length(GANADORES, X),

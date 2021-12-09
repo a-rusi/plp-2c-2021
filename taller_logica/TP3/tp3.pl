@@ -29,8 +29,10 @@ sonCampeones([L|LS]) :- campeon(L), sonCampeones(LS).
 
 % equipoInfinito(-E)
 equipoInfinito(E) :- desde(1,Tamaño), length(E,Tamaño), sonCampeones(E).
-% Es reversible E? -> Si esta instanciado va a chequear que el tamaño que esto sea cierto length(E,Tamaño) (que lo sera en la ultima chequeo de desde)
-% y que todos los elementos de E sean campeones (que puede no serlo necesariamente).
+% Es reversible E? -> No, no lo es. Si se le pasa un input invalido (como un arreglo de numeros),
+% el auxiliar "desde" hara que chequee infinitamente si sonCampeones.
+% En caso de ser un equipo valido de campeones, devolvera true cuando Tamaño coincida con el largo del equipo,
+% pero al pedirle mas resultados desde haria que el programa se trabe.
 
 % distintosTipos(+CAMPEON, +LISTA)
 distintosTipos(_, []).
@@ -46,7 +48,9 @@ between(1,4,CantJugadores),
 length(E,CantJugadores),
 sonCampeones(E),
 sinTiposRepetidos(E).
-% Es reversible E? -> Es similar al caso de equipoInfinto, va a chequear que sea valido length, sonCampeones y tambien sinTiposRepetidos.
+% Es reversible E? -> De manera similar equipoInfinto, va a chequear que sea valido length, sonCampeones y ahora tambien sinTiposRepetidos.
+% La principal diferencia es que no usamos el auxiliar "desde": la cantidad de chequeos que hacemos con between es finita.
+% Entonces programa no se cuelga porque hace una cantidad finita de chequeos, y devuelve true cuando es valido y false cuando el input es invalido.
 
 % bajarAD(+E, -EF, +ATAQUE)
 bajarAD([], [], _).
@@ -96,11 +100,11 @@ par(Y) :- Y mod 2 =:= 0.
 pelea(E1, E2, C, G) :- peleaAux(E1, E2, _, _, C, G).
 
 % peleaAux(+E1, +E2, -E1F, -E2F, +C, -G)
-peleaAux(E1, E2, _, _, 0, G) :- length(E1, X), length(E2, Y), X > Y, E1 = G.
-peleaAux(E1, E2, _, _, 0, G) :- length(E1, X), length(E2, Y), X < Y, E2 = G.
-peleaAux(E1, E2, _, _, 0, G) :- length(E1, X), length(E2, Y), X =:= Y, G = [].
-peleaAux([], E2, _, _, _, G) :- G = E2.
-peleaAux(E1, [], _, _, _, G) :- G = E1.
+peleaAux(E1, E2, _, _, 0, E1) :- length(E1, X), length(E2, Y), X > Y.
+peleaAux(E1, E2, _, _, 0, E2) :- length(E1, X), length(E2, Y), X < Y.
+peleaAux(E1, E2, _, _, 0, []) :- length(E1, X), length(E2, Y), X =:= Y.
+peleaAux([], E2, _, _, _, E2).
+peleaAux(E1, [], _, _, _, E1).
 peleaAux(E1, E2, E1F, E2F, C, G) :- C > 0, stepPelea(E1, E2, E1F, E2F), STEP is C-1, peleaAux(E2F, E1F, _, _, STEP, G).
 % peleaAux(E1, E2, E1F, E2F, C, G) :- par(C), C > 0, stepPelea(E1, E2, E1F, E2F), STEP is C-1, peleaAux(E1F, E2F, _, _, STEP, G).
 % peleaAux(E1, E2, E1F, E2F, C, G) :- not(par(C)), stepPelea(E2, E1, E2F, E1F), STEP is C-1, peleaAux(E1F, E2F, _, _, STEP, G).
@@ -164,6 +168,7 @@ testEquipoValido(1) :- campeon(X), equipoValido(E), E = [X].
 testEquipoValido(2) :- equipoValido(E), E = [(teemo,180,80), (akali,200,150)].
 testEquipoValido(3) :- equipoValido(E), E = [(akali,200,150), (teemo,180,80)].
 testEquipoValido(4) :- equipoValido(E), not((E = [(morgana,200,30), (morgana,200,30)])).
+% test no repetidos de tipo
 testEquipoValido(5) :- equipoValido(E), not((E = [(teemo,180,80), (morgana,200,30)])).
 testEquipoValido(6) :- equipoValido(E), not((E = [(techies,180,80), (morgana,200,30), (juggernaut, 200, 150), (pudge, 999, 2)])).
 

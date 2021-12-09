@@ -12,9 +12,7 @@ instance Show a => Show (RTE a) where
 
 --------------Resolver--------------
 instance Eq a => Eq (RTE a) where
-  (Rose i hijos1) == (Rose j hijos2) = i == j &&
-   length hijos1 == length hijos2 &&
-    length (List.permutations hijos1 `List.intersect` List.permutations hijos2) == length (List.permutations hijos1)
+  (Rose i hijos1) == (Rose j hijos2) = i == j && hijos2 `elem` List.permutations hijos1
 
 
 foldRose:: (a -> [(Char, b)] -> b) -> RTE a -> b

@@ -228,6 +228,35 @@ testHonor(2) :- honor([(akali,200,150)], [(brand,160,40), (chogat,50,50)], C), C
 testHonor(3) :- honor([(amumu,400,50)], [(brand,230,40), (chogat,400,50)], C), member(C, [brand, chogat]).
 testHonor(4) :- honor([(evelyn, 100, 100)], [(akali, 1000, 50), (teemo, 1000, 50)], C), C = teemo.
 
+cantidadTestsHpDiff(3).
+testHpDiff(1) :- hpDiffs([], G), G = [].
+testHpDiff(2) :- hpDiffs([(akali,300,150)], G), G = [-100].
+testHpDiff(3) :- hpDiffs([(akali, 100, 150)], G), G = [100].
+testHpDiff(3) :- hpDiffs([(akali, 100, 150), (soraka,300,10)], G), G = [100, 0].
+
+cantidadTestsBajarAD(2).
+testBajarAd(1) :- bajarAD([(akali,300,150)], T, 10), T = [(akali,300,140)].
+testBajarAd(2) :- bajarAD([(akali,300,150), (evelyn, 100, 100)], T, 150), T = [(akali,300,0), (evelyn, 100, 0)].
+
+cantidadTestsBajarHPAlPrimero(2).
+testBajarHPAlPrimero(1) :- bajarHPAlPrimero([(akali,300,150)], T, 10), T = [(akali, 290,150)].
+testBajarHPAlPrimero(2) :- bajarHPAlPrimero([(akali,300,150), (evelyn, 100, 100)], T, 10), T = [(akali,290,150), (evelyn, 100, 100)].
+
+cantidadTestsBajarHP(2).
+testBajarHP(1) :- bajarHP([(akali, 300, 150)], T, 10), T = [(akali, 290, 150)].
+testBajarHP(2) :- bajarHP([(akali,300,150), (evelyn, 100, 100)], T, 120), T = [(akali, 180, 150)].
+
+cantidadTestsBuffearEquipo(2).
+testBuffear(1) :- buffearEquipo([(akali, 300, 150)], T, 100), T = [(akali, 400, 250)].
+testBuffear(2) :- buffearEquipo([(akali, 300, 150), (evelyn, 100, 100)], T, 100), T = [(akali, 400, 250),  (evelyn, 200, 200)].
+
+cantidadTestsMoverAtras(2).
+testMoverAtras(1) :- moverAtras((akali,300,150), [], T), T = [(akali,300,150)].
+testMoverAtras(2) :- moverAtras((akali,300,150), [(evelyn,100,100)], T), T = [(evelyn,100,100), (akali,300,150)].
+
+
+
+
 tests(equipoInfinito) :- cantidadTestsEquipoInfinito(M), forall(between(1,M,N), testEquipoInfinito(N)).
 tests(equipoValido) :- cantidadTestsEquipoValido(M), forall(between(1,M,N), testEquipoValido(N)).
 tests(stepPelea) :- cantidadTestsStepPelea(M), forall(between(1,M,N), testStepPelea(N)).
@@ -237,6 +266,12 @@ tests(honor) :- cantidadTestsHonor(M), forall(between(1,M,N), testHonor(N)).
 tests(sonCampeones) :- cantidadTestsSonCampeones(M), forall(between(1,M,N), testSonCampeones(N)).
 tests(atacar) :- cantidadTestsAtacar(M), forall(between(1,M,N), testAtacar(N)).
 tests(nombreCampeones) :- cantidadTestsNombreCampeones(M), forall(between(1,M,N), testNombreCampeones(N)).
+tests(hpDiff) :- cantidadTestsHpDiff(M), forall(between(1,M,N), testHpDiff(N)).
+tests(bajarAD) :- cantidadTestsBajarAD(M), forall(between(1,M,N), testBajarAd(N)).
+tests(bajarHPAlPrimero) :- cantidadTestsBajarHPAlPrimero(M), forall(between(1,M,N), testBajarHPAlPrimero(N)).
+tests(bajarHP) :- cantidadTestsBajarHP(M), forall(between(1,M,N), testBajarHP(N)).
+tests(buffearEquipo) :- cantidadTestsBuffearEquipo(M), forall(between(1,M,N), testBuffear(N)).
+tests(moverAtras) :- cantidadTestsMoverAtras(M), forall(between(1,M,N), testMoverAtras(N)).
 
 tests(todos) :-
   tests(equipoInfinito),
@@ -246,7 +281,13 @@ tests(todos) :-
   tests(gana),
   tests(gana),
   tests(sonCampeones),
-  tests(atacar).
-  tests(nombreCampeones).
+  tests(atacar),
+  tests(nombreCampeones),
+  tests(hpDiff),
+  tests(bajarAD),
+  tests(bajarHPAlPrimero),
+  tests(bajarHP),
+  tests(buffearEquipo),
+  tests(moverAtras).
 
 tests :- tests(todos).
